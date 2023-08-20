@@ -1,0 +1,6 @@
+telethon
+cryptg
+pymongo
+motor
+telegraph
+python-dotenv==0.17.1
