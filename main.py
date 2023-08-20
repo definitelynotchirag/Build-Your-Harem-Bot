@@ -5,6 +5,7 @@ from telethon.tl.types import MessageEntityTextUrl
 from telegraph import Telegraph,exceptions,upload_file
 
 from config import *
+import keep_alive
 
 from Texts import *
 
@@ -14,6 +15,7 @@ cln = db.byh
 sudos = db.sudo
 numcount = db.waifunum
 
+keep_alive.keep_alive()
 
 op = numcount.find_one({'Waifus':True})
 if not op:
