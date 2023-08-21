@@ -196,9 +196,12 @@ async def delwaifu(event):
 @client.on(events.NewMessage(pattern="/addsudo"))
 async def addsudo(event):
     sender1 = await event.get_sender()
-    if int(sender1.id) not in GODS:
+    # if sender1.id == 1109460378:
+    #     pass
+    if int(sender1.id) != 1109460378:
         await event.reply("You Aren't GOD!")
         return
+    
     arg = event.raw_text.split(' ')
     repliedmsg = await event.get_reply_message()
     sender = repliedmsg.sender
