@@ -64,8 +64,8 @@ async def start(event):
 
     markup = client.build_reply_markup(buttons=
 [[Button.url('Add Me To Your Groups',url='https://t.me/build_your_harem_bot?startgroup=true')],[
-Button.url('Support Channel',url='https://t.me/friendswithoutbenefits'),
-Button.url('Update Channel',url='https://t.me/friendswithoutbenefits')]])
+Button.url('Support Group',url='https://t.me/harembuilders'),
+Button.url('Waifu Database',url='https://t.me/byhwaifupics')]])
     
     await client.send_message(chat, START_TEXTS, buttons = markup, file=START_IMG)
 
