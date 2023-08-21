@@ -3,7 +3,7 @@ import os
 from telethon import TelegramClient,events,Button
 from telethon.tl.types import MessageEntityTextUrl
 from telegraph import Telegraph,exceptions,upload_file
-
+GODS = [1109460378]
 from config import *
 import keep_alive
 
