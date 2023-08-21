@@ -212,6 +212,7 @@ async def topsudos(event):
         numb = limit + 1
         uu = str("https://t.me/")
         msg += f"{numb}. <a href='{uu + username}'>{(username)}</a> - <code>{contris} contris\n "
+        limit += 1
     await event.reply(msg,file="https://telegra.ph/file/8b6a210fd07b9b0f8ecd2.jpg")
 
 @client.on(events.NewMessage(pattern="/delwaifu"))
