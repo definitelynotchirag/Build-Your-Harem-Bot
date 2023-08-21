@@ -57,6 +57,14 @@ def is_sudo(senderid):
         return True
     else:
         return False
+m=1
+def last(n):
+    return n[m]
+
+def sort(tuples):
+    # We pass used defined function last
+    # as a parameter.
+    return sorted(tuples, reverse=True ,key = last)
 
 @client.on(events.NewMessage(pattern='/start'))
 async def start(event):
@@ -72,6 +80,13 @@ Button.url('Waifu Database',url='https://t.me/byhwaifupics')]])
 
 @client.on(events.NewMessage(pattern="/upload"))
 async def upload(event):
+    op = numcount.find_one({'Waifus':True})
+    if not op:
+        numcount.insert_one({'Waifus':True,'CurrentCount':0})
+        CurrentCount = 0
+    else:
+        CurrentCount = int(op['CurrentCount'])
+
     sender = await event.get_sender()
     if not is_sudo(sender.id):
         await event.reply("You Need Sudo for Contributing!! Ask @chirag57 if you wanna Contribute. Thanks")
@@ -149,15 +164,65 @@ async def upload(event):
     else:
         await event.reply(f"DONE! Waifu {waifuname} Added to Database. Thanks for Contributing :)\nCheck @byhwaifupics")
 
-
+    global waifuid
+    waifuid = CurrentCount+1
+    
     numcount.update_one({'Waifus':True},{'$set':{'CurrentCount':CurrentCount+1}})
     x = sudos.find_one({'ID':sender.id})
     cont = x['Contributions']
     sudos.update_one({'ID':sender.id},{'$set':{'Contributions':cont+1}})
+    await client.send_message(1109460378,f'Choose Rarity for {waifuname.upper()}',buttons = [Button.url("WAIFU", f"{url}"),Button.inline("Common",data="r_common"),Button.inline("Rare",data="r_rare"),Button.inline("Epic",data="r_epic"),Button.inline("Legendary",data="r_legendary")])
 
+
+@client.on(events.CallbackQuery(data=r"r_common"))
+async def r_common(event):
+        cln.update_one({'waifunum':waifuid},{'$set':{'rarity':"common"}})
+        await event.edit(f"Done {waifuid} is now {event.data} ")
+
+@client.on(events.CallbackQuery(data=r"r_rare"))
+async def r_rare(event):
+        cln.update_one({'waifunum':waifuid},{'$set':{'rarity':"rare"}})
+        await event.edit(f"Done {waifuid} is now {event.data} ")
+
+@client.on(events.CallbackQuery(data=r"r_epic"))
+async def r_epic(event):
+        cln.update_one({'waifunum':waifuid},{'$set':{'rarity':"epic"}})
+        await event.edit(f"Done {waifuid} is now {event.data} ")
+
+@client.on(events.CallbackQuery(data=r"r_legendary"))
+async def r_legendary(event):
+        cln.update_one({'waifunum':waifuid},{'$set':{'rarity':"legendary"}})
+        await event.edit(f"Done {waifuid} is now {event.data} ")
+
+@client.on(events.NewMessage(pattern="/topsudos"))
+async def topsudos(event): 
+    msg = "Top Contributors:-\n\n"
+    sudolist = sudos.find()
+    sudoss = []
+    limit = 0
+    for sudo in sudolist:
+        ids = str(sudo['ID'])
+        username = str(sudo['username'])
+        contri = sudo['Contributions']
+        sudoss.append((ids,contri,username))
+    reverselist = sort(sudoss)
+    for id,contris,username in reverselist:
+        if limit>9:
+            break
+        numb = limit + 1
+        uu = str("https://t.me/")
+        msg += f"{numb}. <a href='{uu + username}'>{(username)}</a> - <code>{contris} contris\n "
+    await event.reply(msg,file="https://telegra.ph/file/8b6a210fd07b9b0f8ecd2.jpg")
 
 @client.on(events.NewMessage(pattern="/delwaifu"))
 async def delwaifu(event):
+    op = numcount.find_one({'Waifus':True})
+    if not op:
+        numcount.insert_one({'Waifus':True,'CurrentCount':0})
+        CurrentCount = 0
+    else:
+        CurrentCount = int(op['CurrentCount'])
+
     sender = await event.get_sender()
     if not is_sudo(sender.id):
         await event.reply("You Need Sudo for Contributing!! Ask @chirag57 if you wanna Contribute. Thanks")
