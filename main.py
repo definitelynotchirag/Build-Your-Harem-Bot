@@ -242,9 +242,10 @@ async def delwaifu(event):
         linkk = waifuu['channellink']
         messageid = linkk.split("/")[4]
         cln.find_one_and_delete({'waifunum':int(arg[1])})
-        await event.reply("Removed!")
-        op = numcount.find_one({'Waifus':True})
-        CurrentCount = int(op['CurrentCount'])
+        # await event.reply("Removed!")
+        # op = numcount.find_one({'Waifus':True})
+        # CurrentCount = int(op['CurrentCount'])
+        CurrentCount -= 1
         numcount.update_one({'Waifus':True},{'$set':{'CurrentCount':CurrentCount-1}})
         x = sudos.find_one({'ID':sender.id})
         cont = x['Contributions']
