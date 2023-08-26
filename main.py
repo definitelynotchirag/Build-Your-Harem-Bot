@@ -210,10 +210,11 @@ async def upload(event):
 async def r_common(event):
         sender = await event.get_sender()
         xd = Tempwaifu.find_one({"sender":sender.id})
-        waifuid = xd['waifuid']
-        cln.update_one({'waifunum':waifuid},{'$set':{'rarity':"common"}})
-        Tempwaifu.update_one({'sender':sender.id},{'$set':{'waifuid':0}})
-        await event.edit(f"Done {waifuid} is now {event.data} ")
+        name = xd['name']        
+        cln.update_one({'name':name},{'$set':{'rarity':"common"}})
+        Tempwaifu.update_one({'sender':sender.id},{'$set':{'name':None}})
+        await event.edit(f"Done {name} is now  {event.data} ")
+
         # Tempwaifu.find_one_and_delete({"sender":sender.id})
 
 
@@ -221,33 +222,31 @@ async def r_common(event):
 async def r_rare(event):
         sender = await event.get_sender()
         xd = Tempwaifu.find_one({"sender":sender.id})
-        waifuid = xd['waifuid']
-        cln.update_one({'waifunum':waifuid},{'$set':{'rarity':"rare"}})
-        Tempwaifu.update_one({'sender':sender.id},{'$set':{'waifuid':0}})
-        await event.edit(f"Done {waifuid} is now {event.data} ")
-        # Tempwaifu.find_one_and_delete({"sender":sender.id})
-
+        name = xd['name']        
+        cln.update_one({'name':name},{'$set':{'rarity':"rare"}})
+        Tempwaifu.update_one({'sender':sender.id},{'$set':{'name':None}})
+        await event.edit(f"Done {name} is now  {event.data} ")
 
 @client.on(events.CallbackQuery(data=r"r_epic"))
 async def r_epic(event):
         sender = await event.get_sender()
         xd = Tempwaifu.find_one({"sender":sender.id})
-        waifuid = xd['waifuid']
-        cln.update_one({'waifunum':waifuid},{'$set':{'rarity':"epic"}})
-        Tempwaifu.update_one({'sender':sender.id},{'$set':{'waifuid':0}})
-        await event.edit(f"Done {waifuid} is now {event.data} ")
-        # Tempwaifu.find_one_and_delete({"sender":sender.id})
+        name = xd['name']        
+        cln.update_one({'name':name},{'$set':{'rarity':"epic"}})
+        Tempwaifu.update_one({'sender':sender.id},{'$set':{'name':None}})
+        await event.edit(f"Done {name} is now  {event.data} ")
+
 
 
 @client.on(events.CallbackQuery(data=r"r_legendary"))
 async def r_legendary(event):
         sender = await event.get_sender()
         xd = Tempwaifu.find_one({"sender":sender.id})
-        waifuid = xd['waifuid']
-        cln.update_one({'waifunum':waifuid},{'$set':{'rarity':"legendary"}})
-        Tempwaifu.update_one({'sender':sender.id},{'$set':{'waifuid':0}})
-        await event.edit(f"Done {waifuid} is now {event.data} ")
-        # Tempwaifu.find_one_and_delete({"sender":sender.id})
+        name = xd['name']        
+        cln.update_one({'name':name},{'$set':{'rarity':"legendary"}})
+        Tempwaifu.update_one({'sender':sender.id},{'$set':{'name':None}})
+        await event.edit(f"Done {name} is now  {event.data} ")
+
 
 
 @client.on(events.NewMessage(pattern="/rarity"))
@@ -270,11 +269,12 @@ async def rarities(event):
         # global waifuid
         waifuid = waifus['waifunum']
         
+
         x = Tempwaifu.find_one({'sender':sender.id})
         if x:
-            Tempwaifu.update_one({'sender':sender.id},{'$set':{'waifuid':waifuid}})
+            Tempwaifu.update_one({'sender':sender.id},{'$set':{'name':name}})
         else:
-            Tempwaifu.insert_one({"sender":sender.id,"waifuid":waifuid})
+            Tempwaifu.insert_one({"sender":sender.id,"name":name})
 
         await event.reply(f'Choose Rarity for:\nName : {name}\nAnime : {anime}\n',file=image,buttons = [Button.url("WAIFU", f"{link}"),Button.inline("Common",data="r_common"),Button.inline("Rare",data="r_rare"),Button.inline("Epic",data="r_epic"),Button.inline("Legendary",data="r_legendary")])
         break
