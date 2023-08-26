@@ -212,9 +212,9 @@ async def r_common(event):
         xd = Tempwaifu.find_one({"sender":sender.id})
         waifuid = xd['waifuid']
         cln.update_one({'waifunum':waifuid},{'$set':{'rarity':"common"}})
+        Tempwaifu.update_one({'sender':sender.id},{'$set':{'waifuid':0}})
         await event.edit(f"Done {waifuid} is now {event.data} ")
         # Tempwaifu.find_one_and_delete({"sender":sender.id})
-        Tempwaifu.update_one({'sender':sender.id},{'$set':{'waifuid':0}})
 
 
 @client.on(events.CallbackQuery(data=r"r_rare"))
@@ -223,9 +223,9 @@ async def r_rare(event):
         xd = Tempwaifu.find_one({"sender":sender.id})
         waifuid = xd['waifuid']
         cln.update_one({'waifunum':waifuid},{'$set':{'rarity':"rare"}})
+        Tempwaifu.update_one({'sender':sender.id},{'$set':{'waifuid':0}})
         await event.edit(f"Done {waifuid} is now {event.data} ")
         # Tempwaifu.find_one_and_delete({"sender":sender.id})
-        Tempwaifu.update_one({'sender':sender.id},{'$set':{'waifuid':0}})
 
 
 @client.on(events.CallbackQuery(data=r"r_epic"))
@@ -234,9 +234,9 @@ async def r_epic(event):
         xd = Tempwaifu.find_one({"sender":sender.id})
         waifuid = xd['waifuid']
         cln.update_one({'waifunum':waifuid},{'$set':{'rarity':"epic"}})
+        Tempwaifu.update_one({'sender':sender.id},{'$set':{'waifuid':0}})
         await event.edit(f"Done {waifuid} is now {event.data} ")
         # Tempwaifu.find_one_and_delete({"sender":sender.id})
-        Tempwaifu.update_one({'sender':sender.id},{'$set':{'waifuid':0}})
 
 
 @client.on(events.CallbackQuery(data=r"r_legendary"))
@@ -245,9 +245,9 @@ async def r_legendary(event):
         xd = Tempwaifu.find_one({"sender":sender.id})
         waifuid = xd['waifuid']
         cln.update_one({'waifunum':waifuid},{'$set':{'rarity':"legendary"}})
+        Tempwaifu.update_one({'sender':sender.id},{'$set':{'waifuid':0}})
         await event.edit(f"Done {waifuid} is now {event.data} ")
         # Tempwaifu.find_one_and_delete({"sender":sender.id})
-        Tempwaifu.update_one({'sender':sender.id},{'$set':{'waifuid':0}})
 
 
 @client.on(events.NewMessage(pattern="/rarity"))
