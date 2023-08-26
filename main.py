@@ -15,6 +15,9 @@ cln = db.byh
 sudos = db.sudo
 numcount = db.waifunum
 groupsdb = db.groups
+users = db.users
+Tempwaifu = db.tempwaifu
+
 
 keep_alive.keep_alive()
 
@@ -52,6 +55,17 @@ print("GRABBING SUDOS")
 
 print("GRABBING THOSE WAIFUS...")
 
+def adduser(senderid):
+    users.insert_one({'userid':senderid})
+    return 
+
+def isuser(userid):
+    userr = users.find_one({'userid':userid})
+    if userr:
+        return userr
+    else:
+        return False
+        
 def is_sudo(senderid):
     is_sudo = sudos.find_one({'ID':senderid})
     if is_sudo:
@@ -70,6 +84,10 @@ def sort(tuples):
 @client.on(events.NewMessage(pattern='/start'))
 async def start(event):
     chat = await event.get_chat()
+    sender = await event.get_sender()
+
+    if not isuser(sender.id):
+        adduser(sender.id)
 
     markup = client.build_reply_markup(buttons=
 [[Button.url('Add Me To Your Groups',url='https://t.me/build_your_harem_bot?startgroup=true')],[
@@ -100,12 +118,15 @@ async def upload(event):
     else :
         arg = event.raw_text.split(" ")
     print(arg)
-    if len(arg) not in [2,3]:
-        await event.reply('Invalid Syntax!\nTry <code>/upload [waifu name] [anime name]</code>\n\nNote: Please use "-" instead of SPACE in anime and waifu name\nEXAMPLE - <code>/upload mikasa-ackerman attack-on-titan</code>')
-        return
-    
+    if len(arg) not in [3,4]:
+        await event.reply('Invalid Syntax!\nTry <code>/upload [waifu name] [anime name] [rarity]\n</code>\n\nNote: Please use "-" instead of SPACE in anime and waifu name\nEXAMPLE - <code>/upload mikasa-ackerman attack-on-titan 1</code>')
     waifuname = arg[1].lower()
     animename = arg[2].lower()
+    rarity = int(arg[3])
+    try:
+        category = int(arg[4])
+    except Exception:
+        category = "Normal"
 
     reversel = list(waifuname.split('-')).reverse()
     bc = []
@@ -136,10 +157,17 @@ async def upload(event):
     except exceptions.TelegraphException as exc:
         await event.reply(f"ERROR:{str(exc)}")
     os.remove(filename)
-    imglink = f"https://te.legra.ph{media_urls[0]}"
+    imglink = f"https://te.legra.ph{media_urls[0]}"   
+    if rarity == 1:
+        rarrity = "common"
+    elif rarity == 2:
+        rarrity = "rare"
+    elif rarity == 3:
+        rarrity = "epic"
+    elif rarity == 4:
+        rarrity = "legendary"
 
-    msg = await client.send_message(WAIFU_CHANNEL,f"#Waifu_added\nName - <code>{waifuname.upper()}</code>\nAnime - <code>{animename.upper()}</code>\nAdded By - @{sender.username if sender.username else sender.id}",file=imglink,buttons = [Button.inline(f"WAIFU ID - {CurrentCount+1}", "cc"),Button.inline(f"👍 - 0",data="incinvite")])
-
+    msg = await client.send_message(WAIFU_CHANNEL,f"#Waifu_added\nName - <code>{waifuname.upper()}</code>\nAnime - <code>{animename.upper()}</code>\nRarity - <code>{rarrity.upper()}</code>\nCategory - <code>{category}</code>\nAdded By - @{sender.username if sender.username else sender.id}",file=imglink,buttons = [Button.inline(f"WAIFU ID - {CurrentCount+1}", "cc"),Button.inline(f"👍 - 0",data="incinvite")])
     url = f"https://t.me/byhwaifupics/{msg.id}"
 
     print(url)
@@ -152,7 +180,10 @@ async def upload(event):
                  'image1likes':0,
                  'image1likedby':[],
                  'channellink':url,
-                 'addedby':f'{sender.username if sender.username else sender.id}'}
+                 'addedby':f'{sender.username if sender.username else sender.id}',
+                 'rarity':rarrity,
+                 'category':category
+                 }
 
     cln.insert_one(waifudict)
     if len(xd) or len(bc) != 0:
@@ -161,12 +192,12 @@ async def upload(event):
             linkss = waifus['channellink']
             imagenum = waifus['imagenum']
             buttons.append(Button.url(f'Waifu - {imagenum}',url=f'{linkss}'))
-        await event.reply("Your Waifu has been addded to database!\nThese Waifu is Added by others too so make sure to check them out!.\n(Last Button is Your Waifu)",buttons=buttons)
+            await event.reply("Your Waifu has been addded to database!\nThese Waifu is Added by others too so make sure to check them out!.\n",buttons=buttons)
     else:
         await event.reply(f"DONE! Waifu {waifuname} Added to Database. Thanks for Contributing :)\nCheck @byhwaifupics")
 
-    global waifuid
-    waifuid = CurrentCount+1
+    global waifu_id
+    waifu_id = CurrentCount+1
     
     numcount.update_one({'Waifus':True},{'$set':{'CurrentCount':CurrentCount+1}})
     x = sudos.find_one({'ID':sender.id})
@@ -177,24 +208,68 @@ async def upload(event):
 
 @client.on(events.CallbackQuery(data=r"r_common"))
 async def r_common(event):
+        sender = await event.get_sender()
+        xd = Tempwaifu.find_one({"sender":sender.id})
+        waifuid = xd['waifuid']
         cln.update_one({'waifunum':waifuid},{'$set':{'rarity':"common"}})
         await event.edit(f"Done {waifuid} is now {event.data} ")
+        Tempwaifu.find_one_and_delete({"sender":sender.id})
+
 
 @client.on(events.CallbackQuery(data=r"r_rare"))
 async def r_rare(event):
+        sender = await event.get_sender()
+        xd = Tempwaifu.find_one({"sender":sender.id})
+        waifuid = xd['waifuid']
         cln.update_one({'waifunum':waifuid},{'$set':{'rarity':"rare"}})
         await event.edit(f"Done {waifuid} is now {event.data} ")
+        Tempwaifu.find_one_and_delete({"sender":sender.id})
+
 
 @client.on(events.CallbackQuery(data=r"r_epic"))
 async def r_epic(event):
+        sender = await event.get_sender()
+        xd = Tempwaifu.find_one({"sender":sender.id})
+        waifuid = xd['waifuid']
         cln.update_one({'waifunum':waifuid},{'$set':{'rarity':"epic"}})
         await event.edit(f"Done {waifuid} is now {event.data} ")
+        Tempwaifu.find_one_and_delete({"sender":sender.id})
+
 
 @client.on(events.CallbackQuery(data=r"r_legendary"))
 async def r_legendary(event):
+        sender = await event.get_sender()
+        xd = Tempwaifu.find_one({"sender":sender.id})
+        waifuid = xd['waifuid']
         cln.update_one({'waifunum':waifuid},{'$set':{'rarity':"legendary"}})
         await event.edit(f"Done {waifuid} is now {event.data} ")
+        Tempwaifu.find_one_and_delete({"sender":sender.id})
 
+
+@client.on(events.NewMessage(pattern="/rarity"))
+async def rarities(event):
+    sender = await event.get_sender()
+    list = cln.find({"addedby":sender.username})
+    for waifus in list:                            
+        name = waifus['name']
+        anime = waifus['anime']
+        link = waifus['channellink']
+        image = waifus['image1']
+        try:
+            rarity = waifus['rarity']
+        except Exception:
+            rarity = None
+
+        if rarity :
+            continue    
+
+        # global waifuid
+        waifuid = waifus['waifunum']
+        Tempwaifu.insert_one({"sender":sender.id,"waifuid":waifuid})
+
+        await event.reply(f'Choose Rarity for:\nName : {name}\nAnime : {anime}\n',file=image,buttons = [Button.url("WAIFU", f"{link}"),Button.inline("Common",data="r_common"),Button.inline("Rare",data="r_rare"),Button.inline("Epic",data="r_epic"),Button.inline("Legendary",data="r_legendary")])
+        break
+        
 @client.on(events.NewMessage(pattern="/topsudos"))
 async def topsudos(event): 
     msg = "Top Contributors:-\n\n"
@@ -308,12 +383,12 @@ async def spawnwaifu(event):
         randomwaifu = list(cln.aggregate([{'$sample': {'size':1} }]))[0]
         name = randomwaifu['name']
         anime = randomwaifu['anime']
-        waifuid = randomwaifu['waifunum']
+        waifuidd = randomwaifu['waifunum']
         # rarity = randomwaifu['rarity']
         image = randomwaifu['image1']
 
         x = await client.send_message(chat,"A Waifu Has Spawned! Grab them by using /protecc [waifu name]",file=image)
-        groupsdb.update_one({'chatid':chat},{'$set':{'Currentlyspawnedwaifu':waifuid}})
+        groupsdb.update_one({'chatid':chat},{'$set':{'Currentlyspawnedwaifu':waifuidd}})
         print(name)
         groupsdb.update_one({'chatid':chat},{'$set':{'Currentlyspawnedwaifumsgid':x.id}})
         groupsdb.update_one({'chatid':chat},{'$set':{'Currentmsgcount':currentmsg+1}})
