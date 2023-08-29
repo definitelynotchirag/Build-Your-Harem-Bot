@@ -6,6 +6,7 @@ from telegraph import Telegraph,exceptions,upload_file
 GODS = [1109460378]
 from config import *
 import keep_alive
+import random
 
 from Texts import *
 
