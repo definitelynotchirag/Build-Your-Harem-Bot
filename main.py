@@ -124,7 +124,7 @@ async def upload(event):
     animename = arg[2].lower()
     rarity = int(arg[3])
     try:
-        category = int(arg[4])
+        category = arg[4]
     except Exception:
         category = "Normal"
 
@@ -167,13 +167,22 @@ async def upload(event):
     elif rarity == 4:
         rarrity = "legendary"
 
-    msg = await client.send_message(WAIFU_CHANNEL,f"#Waifu_added\nName - <code>{waifuname.upper()}</code>\nAnime - <code>{animename.upper()}</code>\nRarity - <code>{rarrity.upper()}</code>\nCategory - <code>{category}</code>\nAdded By - @{sender.username if sender.username else sender.id}",file=imglink,buttons = [Button.inline(f"WAIFU ID - {CurrentCount+1}", "cc"),Button.inline(f"👍 - 0",data="incinvite")])
+    i = True
+    while i == True:
+        waifusid = int(random.randrange(550,5000))
+        try:
+            iswaifu = cln.find_one({"waifunum":waifusid})
+        except Exception:
+            continue
+        i = False
+
+    msg = await client.send_message(WAIFU_CHANNEL,f"#Waifu_added\nName - <code>{waifuname.upper()}</code>\nAnime - <code>{animename.upper()}</code>\nRarity - <code>{rarrity.upper()}</code>\nCategory - <code>{category}</code>\nAdded By - @{sender.username if sender.username else sender.id}",file=imglink,buttons = [Button.inline(f"WAIFU ID - {waifusid}", "cc"),Button.inline(f"👍 - 0",data="incinvite")])
     url = f"https://t.me/byhwaifupics/{msg.id}"
 
     print(url)
     waifudict = {'name':f'{waifuname}',
                  'reversename':f'{reversewaifuname}',
-                 'waifunum':CurrentCount+1,
+                 'waifunum':waifusid,
                  'imagenum':nextimagenum,
                  'anime':  f'{animename}',
                  'image1':f"https://te.legra.ph{media_urls[0]}",
@@ -203,7 +212,7 @@ async def upload(event):
     x = sudos.find_one({'ID':sender.id})
     cont = x['Contributions']
     sudos.update_one({'ID':sender.id},{'$set':{'Contributions':cont+1}})
-    await client.send_message(1109460378,f'Choose Rarity for {waifuname.upper()}',buttons = [Button.url("WAIFU", f"{url}"),Button.inline("Common",data="r_common"),Button.inline("Rare",data="r_rare"),Button.inline("Epic",data="r_epic"),Button.inline("Legendary",data="r_legendary")])
+    # await client.send_message(1109460378,f'Choose Rarity for {waifuname.upper()}',buttons = [Button.url("WAIFU", f"{url}"),Button.inline("Common",data="r_common"),Button.inline("Rare",data="r_rare"),Button.inline("Epic",data="r_epic"),Button.inline("Legendary",data="r_legendary")])
 
 
 @client.on(events.CallbackQuery(data=r"r_common"))
