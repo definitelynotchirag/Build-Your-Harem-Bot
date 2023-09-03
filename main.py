@@ -288,7 +288,89 @@ async def rarities(event):
 
         await event.reply(f'Choose Rarity for:\nName : {name}\nAnime : {anime}\n',file=image,buttons = [Button.url("WAIFU", f"{link}"),Button.inline("Common",data="r_common"),Button.inline("Rare",data="r_rare"),Button.inline("Epic",data="r_epic"),Button.inline("Legendary",data="r_legendary")])
         break
+
+
+@client.on(events.NewMessage(pattern="/search"))
+async def search(event):
+    limit = 0
+    
+    args = event.raw_text.split(" ")
+
+    if len(args) == 1:
+        await event.reply("Please Enter Some Query To Search")
+
+    args.remove('/search')
+    
+    query = '-'.join(args)
+    # query = args[1]
+    msg = "Here Are the Possible Results:\n\n"
+    # x = cln.find({'$or':[{'name':query},{'anime':query},{'waifunum':query}]})
+    # x = cln.find({'$text':{'$search':query}})
+    x = cln.aggregate([
+        {
+            '$search':{
+                'index':'default',
+                'text':{
+                    'query':f'{query}',
+                    'path':['name', 'anime'],
+                },
+            },
+        }
+        # {
+        #     '$project':{
+        #         'name':10,
+        #         'waifunum':10,
+        #         'channellink':10,
+        #     }
+        # }
+    ])
+    resultlist = []
+    buttons = []
+    for results in x:
+        # resultlist.append(results)
+        name = results['name']
+        onename = name.split("-")[0]
+        ids = results['waifunum']
+        link = results['channellink']
+        resultlist.append((name,ids,link))
+
+    if len(resultlist) == 0:
+        x = cln.find({'waifunum':int(query)})
+        for results in x:
+            name = results['name']
+            onename = name.split("-")[0]
+            ids = results['waifunum']
+            link = results['channellink']
+
+            resultlist.append((name,ids,link))
+
+    
+        # await event.reply("No Results Found")
+    # print(resultlist)
+    for waifu,ids,links in resultlist:
+        if limit>100:
+            break
+        msg += f"{limit+1}. <code>{ids}</code> - <a href='{links}'>{(waifu)}</a>\n"
+        # buttons.append(Button.url(f'{waifu}',url=f'{links}'))
+        limit = limit + 1
+
+# print(res)
+    if len(msg)>4028:
+        x=4028
+        res=[msg[y-x:y] for y in range(x, len(msg)+x,x)]
+        # print(res[1])
+        await event.reply(res[0],link_preview=False)
+        if len(res)>1:
+            await event.reply(res[1],link_preview=False)
+        if len(res)>2:
+            await event.reply(res[2],link_preview=False)
+
+    elif len(msg)>1024:
+        await event.reply(msg,link_preview=False)
         
+    else:
+        await event.reply(msg,file="https://telegra.ph/file/477898dfd14c4604c3cc1.jpg")
+
 @client.on(events.NewMessage(pattern="/topsudos"))
 async def topsudos(event): 
     msg = "Top Contributors:-\n\n"
