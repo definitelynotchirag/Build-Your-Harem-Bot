@@ -478,6 +478,9 @@ async def spawnwaifu(event):
 
     spawntime = int(ischat['spawntime'])
     currentmsg = int(ischat['Currentmsgcount'])
+    # if currentmsg != spawntime:
+    #     return
+
     if currentmsg == spawntime:
         waifuslist = []
         # waifuss = cln.find()
@@ -488,14 +491,24 @@ async def spawnwaifu(event):
         # rarity = randomwaifu['rarity']
         image = randomwaifu['image1']
 
+        groupsdb.update_one({'chatid':chat},{'$set':{'Currentmsgcount':currentmsg+1}})
         x = await client.send_message(chat,"A Waifu Has Spawned! Grab them by using /protecc [waifu name]",file=image)
         groupsdb.update_one({'chatid':chat},{'$set':{'Currentlyspawnedwaifu':waifuidd}})
-        print(name)
+        # print(name)
         groupsdb.update_one({'chatid':chat},{'$set':{'Currentlyspawnedwaifumsgid':x.id}})
-        groupsdb.update_one({'chatid':chat},{'$set':{'Currentmsgcount':currentmsg+1}})
+        return;
+        # await asyncio.sleep(30)
+        # client.send_message("The Waifu Ran Away! As no one chose to protecc them :(")
+        # groupsdb.update_one({'chatid':chat},{'$set':{'Currentlyspawnedwaifu':None}})
+        # groupsdb.update_one({'chatid':chat},{'$set':{'Currentlyspawnedwaifumsgid':None}})
+        # groupsdb.update_one({'chatid':chat},{'$set':{'lastspawnedwaifu':waifuidd}})
+        # groupsdb.update_one({'chatid':chat},{'$set':{'lastwaifugrabber':}})
+        # groupsdb.update_one({'chatid':chat},{'$set':{'Currentmsgcount':0}})
+        # return
 
     else:
         groupsdb.update_one({'chatid':chat},{'$set':{'Currentmsgcount':currentmsg+1}})
+        return
 
 @client.on(events.NewMessage(pattern="/protecc"))
 async def proteccwaifu(event):
@@ -508,6 +521,7 @@ async def proteccwaifu(event):
     try:
         lastspawnedwaifu = chatinfo['lastspawnedwaifu']
         lastgrabbedby = chatinfo['lastwaifugrabber']
+        
     except Exception:
         lastspawnedwaifu = None
 
@@ -515,8 +529,9 @@ async def proteccwaifu(event):
         spawnedwaifu = chatinfo['Currentlyspawnedwaifu']
         msgid = chatinfo['Currentlyspawnedwaifumsgid']
     except KeyError:
-        if not lastspawnedwaifu:
+        if not spawnedwaifu:
             await event.reply('No Waifus here To protecc!!')
+            return
         else:
             await event.reply(f'Waifu Already Grabbed by {lastgrabbedby}')
 
@@ -525,6 +540,7 @@ async def proteccwaifu(event):
         args.remove('/protecc')
     except Exception:
         await event.reply('Invalid Syntax!!\nUse <code>/protecc [waifu name]</code>')
+        return
     
     waifu = cln.find_one({'waifunum':spawnedwaifu})
     name = str(waifu['name'])
@@ -533,15 +549,17 @@ async def proteccwaifu(event):
     print(namelist)
     for argument in args:
         print(argument)
-        if argument in namelist:
+        if argument.lower() in namelist:
             await event.reply(f'Woah! You Just Grabbed {" ".join(namelist).capitalize()}. This Waifu has been added to your harem!')
             groupsdb.update_one({'chatid':chat},{'$set':{'Currentlyspawnedwaifu':None}})
+            groupsdb.update_one({'chatid':chat},{'$set':{'Currentlyspawnedwaifumsgid':None}})
             groupsdb.update_one({'chatid':chat},{'$set':{'lastspawnedwaifu':waifu['waifunum']}})
             groupsdb.update_one({'chatid':chat},{'$set':{'lastwaifugrabber':sender.id}})
             groupsdb.update_one({'chatid':chat},{'$set':{'Currentmsgcount':0}}) 
             break
         else:
             await event.reply(f"<code>That Doesn't Seem As a Correct Name! Use Your Anime Brain</code>")
+            return
     
 
 @client.on(events.CallbackQuery(data='incinvite'))
